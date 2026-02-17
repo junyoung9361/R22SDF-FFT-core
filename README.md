@@ -70,6 +70,5 @@ This project implements a streaming **R2^2 SDF FFT/IFFT core** and verifies it a
 - File names and some scripts preserve original naming used during development.
 
 ## License
-
-Add your preferred license (for example, MIT) before making this repository public.
+This project was developed as part of the **System Semiconductor Design** coursework at **Kwangwoon University**.
 
