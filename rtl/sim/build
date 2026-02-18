@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Optional: pre-load Vivado tools if not already on PATH.
+if ! command -v xvlog >/dev/null 2>&1; then
+  if [[ -n "${VIVADO_SETTINGS:-}" && -f "${VIVADO_SETTINGS}" ]]; then
+    # shellcheck disable=SC1090
+    source "${VIVADO_SETTINGS}"
+  fi
+fi
+
+if ! command -v xvlog >/dev/null 2>&1 || ! command -v xelab >/dev/null 2>&1 || ! command -v xsim >/dev/null 2>&1; then
+  echo "ERROR: xvlog/xelab/xsim not found."
+  echo "Set VIVADO_SETTINGS, e.g.:"
+  echo "  export VIVADO_SETTINGS=/tools/Xilinx/Vivado/2022.2/settings64.sh"
+  exit 1
+fi
+
+# Twiddle file
+ln -sf ./twiddle_factor/twiddle_ROM_1.hex .
+ln -sf ./twiddle_factor/twiddle_ROM_2.hex .
+ln -sf ./twiddle_factor/twiddle_ROM_3.hex .
+ln -sf ./twiddle_factor/twiddle_ROM_4.hex .
+
+xvlog -sv -f filelist.f
+xelab testbench -debug wave -s testbench
+
+if [[ "${1:-}" == "gui" ]]; then
+  xsim testbench -gui -wdb simulate_xsim_testbench.wdb
+else
+  xsim testbench -runall -wdb simulate_xsim_testbench.wdb
+fi

@@ -78,12 +78,13 @@ for i=1:N
 end
 
 % Export Input Data
-file_name = sprintf('input_data_%s_%d.hex', senario_name, N); 
-fid = fopen(file_name, 'w');
+file_name = sprintf('input_data_%s_%d.bin', senario_name, N); 
+fid = fopen(file_name, 'wb');
 for i = 1:N
     re_hex = bitand(int32(curr_re(i)), 2^WL-1); 
     im_hex = bitand(int32(curr_im(i)), 2^WL-1);
-    fprintf(fid, '%04X_%04X\n', re_hex, im_hex);
+    word32 = bitor(bitshift(uint32(re_hex), 16), uint32(im_hex));
+    fwrite(fid, word32, 'uint32');
 end
 fclose(fid);
 
@@ -149,16 +150,6 @@ if mod(total_stages, 2) == 1
     end
     stages_processed = 1;
 end
-
-fid = fopen('head_data0_32.hex', 'w'); 
-for i = 1:N
-    out_re = curr_re(1, i);
-    out_im = curr_im(1, i);
-    re_hex = bitand(int32(out_re), 2^WL-1); 
-    im_hex = bitand(int32(out_im), 2^WL-1);
-    fprintf(fid, '%04X%04X\n', re_hex, im_hex);
-end
-fclose(fid);
 
 % Macro Stages (Radix2^2)
 num_stages = (total_stages - stages_processed) / 2;
@@ -312,16 +303,6 @@ for stage = 1 : num_stages
     current_N = current_N / 4;
 end
 
-%% ================= Output file (befor bit reversal)================= %%
-% fid = fopen('output_data.hex', 'w'); 
-% for i = 1:N
-%     out_re = curr_re(1, i);
-%     out_im = curr_im(1, i);
-%     re_hex = bitand(int32(out_re), 2^WL-1); 
-%     im_hex = bitand(int32(out_im), 2^WL-1);
-%     fprintf(fid, '%04X%04X\n', re_hex, im_hex);
-% end
-% fclose(fid);
 
 %% ================= 3. Bit reverse ================= %%
 dout_re = zeros(1, N);
@@ -340,14 +321,16 @@ for i = 0:N-1
     dout_im(rev + 1) = res_im;
 end
 
-file_name = sprintf('output_data_%s_%d.hex', senario_name, N); 
-fid = fopen(file_name, 'w');
+%% ================= Output file Export ================= %%
+file_name = sprintf('output_data_%s_%d.bin', senario_name, N); 
+fid = fopen(file_name, 'wb');
 for i = 1:N
     out_re = dout_re(1, i);
     out_im = dout_im(1, i);
     re_hex = bitand(int32(out_re), 2^WL-1); 
     im_hex = bitand(int32(out_im), 2^WL-1);
-    fprintf(fid, '%04X%04X\n', re_hex, im_hex);
+    word32 = bitor(bitshift(uint32(re_hex), 16), uint32(im_hex));
+    fwrite(fid, word32, 'uint32');
 end
 fclose(fid);
 

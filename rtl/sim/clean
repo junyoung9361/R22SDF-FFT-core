@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+rm -rf xsim.dir .Xil
+rm -f *.jou *.log *.pb *.wdb *.str xelab.pb xvlog.pb webtalk* xsim*.log
+rm -f *.hex
