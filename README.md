@@ -21,22 +21,23 @@ This project implements a streaming **R2^2 SDF FFT/IFFT core** and verifies it a
 
 ## Repository Structure
 
-- `HW/`: Verilog RTL
-- `HW/top/fft_core.v`: main FFT core
-- `HW/top/fft_top.v`: AXI-Lite + AXI-Stream integrated top
-- `HW/stage/`: stage-level arithmetic and pipeline blocks
-- `HW/bit_reverse/`: bit-reversal modules
-- `testbench/`: simulation testbenches and twiddle ROM hex files
-- `matlab/`: floating/fixed-point modeling, vector generation, error analysis
-- `SW/`: AXI DMA + control software for FPGA-side validation
+- `rtl/design/`: Verilog RTL
+- `rtl/design/top/fft_core.v`: main FFT core
+- `rtl/design/top/fft_top.v`: AXI-Lite + AXI-Stream integrated top
+- `rtl/design/stage/`: stage-level arithmetic and pipeline blocks
+- `rtl/design/bit_reverse/`: bit-reversal modules
+- `rtl/testbench/`: simulation testbenches
+- `rtl/sim/`: simulator scripts (`build`, `clean`) + filelist
+- `rtl/fpga/`: FPGA integration and software (AXI DMA/control)
+- `matlab/`: fixed-point modeling, vector generation, error analysis
 - `python/`: helper scripts/data conversion files
 
 ## Design Flow
 
-1. Generate input/golden vectors from MATLAB model (`matlab/fft_fixed.m`, `matlab/fft_float.m`)
-2. Run RTL simulation using `testbench/tb_fft_core.sv`
-3. Integrate with AXI-based top (`HW/top/fft_top.v`)
-4. Validate on FPGA using DMA/control software (`SW/main.c`)
+1. Generate input/golden vectors from MATLAB model (`matlab/fft_fixed.m`)
+2. Run RTL simulation using `rtl/sim/build`
+3. Integrate with AXI-based top (`rtl/design/top/fft_top.v`)
+4. Validate on FPGA using DMA/control software (`rtl/fpga/SW/main.c`)
 
 ## Quick Start
 
@@ -49,20 +50,24 @@ This project implements a streaming **R2^2 SDF FFT/IFFT core** and verifies it a
 
 ### 2) RTL simulation
 
-- Main TB: `testbench/tb_fft_core.sv`
-- Ensure ROM/vector hex files are in simulator search path:
-  - `testbench/twiddle_ROM_*.hex`
-  - `matlab/test_vector/.../*.hex`
+- Main TB: `rtl/testbench/testbench.sv` + `rtl/testbench/test_case.sv`
+- Build & run:
+  - `cd rtl/sim`
+  - `./build` (CLI)
+  - `./build gui` (GUI)
+- Vector format (binary):
+  - 32-bit word: `[31:16]=Re`, `[15:0]=Im` (signed 16-bit)
+  - Example files: `input_data_*.bin`, `output_data_*.bin`
 
 ### 3) FPGA validation
 
-- Top module: `HW/top/fft_top.v`
+- Top module: `rtl/design/top/fft_top.v`
 - Control/Data path:
   - AXI4-Lite for config (point size, inverse mode)
   - AXI4-Stream + DMA for sample transfer
 - Software examples:
-  - `SW/main.c`
-  - `SW/test.c`
+  - `rtl/fpga/SW/main.c`
+  - `rtl/fpga/SW/test.c`
 
 ## Notes
 
@@ -71,4 +76,3 @@ This project implements a streaming **R2^2 SDF FFT/IFFT core** and verifies it a
 
 ## License
 This project was developed as part of the **System Semiconductor Design** coursework at **Kwangwoon University**.
-
